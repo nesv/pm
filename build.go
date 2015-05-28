@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -33,7 +32,7 @@ func Build(m *Metadata, outputDir string) error {
 
 	// Add the binaries.
 	for _, binPath := range m.Binaries {
-		if err := tarAddBinary(tarw, binPath); err != nil {
+		if err := tarAddBinary(tarw, m, binPath); err != nil {
 			return err
 		}
 	}
@@ -48,7 +47,7 @@ func Build(m *Metadata, outputDir string) error {
 			}
 
 			for _, match := range matches {
-				if err := writeResource(tarw, match); err != nil {
+				if err := writeResource(tarw, m, match); err != nil {
 					return err
 				}
 			}
@@ -58,7 +57,7 @@ func Build(m *Metadata, outputDir string) error {
 	return nil
 }
 
-func writeResource(tw *tar.Writer, resourcePath string) error {
+func writeResource(tw *tar.Writer, m *Metadata, resourcePath string) error {
 	log.Println("adding resource", resourcePath)
 
 	f, err := os.Open(resourcePath)
@@ -76,7 +75,12 @@ func writeResource(tw *tar.Writer, resourcePath string) error {
 	if err != nil {
 		return fmt.Errorf("pm: error creating tar header for file %q: %v", resourcePath, err)
 	}
-	hdr.Name = strings.TrimLeft(filepath.Clean(resourcePath), "./")
+
+	name := filepath.Join(
+		fmt.Sprintf("%s-%s", m.Name, m.Version),
+		filepath.Clean(resourcePath),
+	)
+	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0
 	hdr.Mode = 0444
@@ -102,8 +106,9 @@ func writeMetadata(tw *tar.Writer, m *Metadata) error {
 
 	now := time.Now()
 
+	name := filepath.Join(fmt.Sprintf("%s-%s", m.Name, m.Version), "metadata.json")
 	hdr := &tar.Header{
-		Name:       "metadata.json",
+		Name:       name,
 		Size:       int64(len(b)),
 		ModTime:    now,
 		AccessTime: now,
@@ -122,7 +127,7 @@ func writeMetadata(tw *tar.Writer, m *Metadata) error {
 	return nil
 }
 
-func tarAddBinary(tw *tar.Writer, binPath string) error {
+func tarAddBinary(tw *tar.Writer, m *Metadata, binPath string) error {
 	log.Println("adding binary", binPath)
 
 	bf, err := os.Open(binPath)
@@ -140,7 +145,12 @@ func tarAddBinary(tw *tar.Writer, binPath string) error {
 	if hdr, err = tar.FileInfoHeader(info, ""); err != nil {
 		return fmt.Errorf("pm: error creating header for binary file %q: %v", binPath, err)
 	}
-	hdr.Name = strings.TrimLeft(filepath.Clean(binPath), "./")
+
+	name := filepath.Join(
+		fmt.Sprintf("%s-%s", m.Name, m.Version),
+		filepath.Clean(binPath),
+	)
+	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0
 	hdr.Mode = 0555
