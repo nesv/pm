@@ -7,12 +7,10 @@ A brutally-simple package manager, in the spirit of Kelsey Hightower's
 
 Unforuntaely, pm is not go-get-able. Since I did not want to have to write
 command-line parsing stuff (read: "reinvent the wheel"), I'm using
-[cobra](https://github.com/spf13/cobra) to do all of the fancy stuff.
+[cobra](https://github.com/spf13/cobra) to do all of the fancy stuff, and I am
+relying on [gpm](https://github.com/pote/gpm) to manage the dependencies.
 
-To build pm, you will need to have [gpm](https://github.com/pote/gpm)
-installed.
-
-Now, once you have gpm installed, all you need to do is run:
+Once you have gpm installed, all you need to do is run:
 
 	$ make
 
