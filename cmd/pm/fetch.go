@@ -55,23 +55,30 @@ func fetch(urlStr string) error {
 		log.Fatalln(err)
 	}
 
-	log.Println("fetching", u.Path)
-
-	r, err := pm.Fetch(urlStr)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer r.Close()
-
 	destPath := filepath.Join(rootCacheDir, filepath.Base(u.Path))
-	dest, err := os.Create(destPath)
-	if err != nil {
-		return fmt.Errorf("failed to create %q", destPath)
-	}
-	defer dest.Close()
+	if f, err := os.Open(destPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed while checking cache for %q", filepath.Base(u.Path))
+	} else if err != nil && os.IsNotExist(err) {
+		log.Println("fetching", u.Path)
 
-	if _, err := io.Copy(dest, r); err != nil {
-		return fmt.Errorf("failed to write file %q", destPath)
+		r, err := pm.Fetch(urlStr)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer r.Close()
+
+		dest, err := os.Create(destPath)
+		if err != nil {
+			return fmt.Errorf("failed to create %q", destPath)
+		}
+		defer dest.Close()
+
+		if _, err := io.Copy(dest, r); err != nil {
+			return fmt.Errorf("failed to write file %q", destPath)
+		}
+	} else {
+		f.Close()
+		log.Printf("using %q from cache", filepath.Base(u.Path))
 	}
 
 	return nil

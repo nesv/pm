@@ -9,6 +9,7 @@ import (
 var (
 	rootBaseDir  string
 	rootCacheDir string
+	rootBinDir   string
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 
 	rootCmd.PersistentFlags().StringVarP(&rootBaseDir, "base-dir", "d", "/usr/local/lib", "Base working directory")
 	rootCmd.PersistentFlags().StringVarP(&rootCacheDir, "cache-dir", "C", "/usr/local/var/pm/cache", "Location where pm will cache downloaded packages")
+	rootCmd.PersistentFlags().StringVarP(&rootBinDir, "bin-dir", "B", "/usr/local/bin", "Directory where symlinks will be created for installed packages")
 
 	rootCmd.AddCommand(
 		BuildCmd,

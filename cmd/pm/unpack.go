@@ -26,9 +26,17 @@ func runUnpack(cmd *cobra.Command, args []string) {
 		args[0], args[1], runtime.GOOS, runtime.GOARCH)
 	pkgPath := filepath.Join(rootCacheDir, pkgFilename)
 
+	if err := unpack(pkgPath); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func unpack(pkgPath string) error {
+	pkgFilename := filepath.Base(pkgPath)
+
 	f, err := os.Open(pkgPath)
 	if err != nil {
-		log.Fatalln("error: package file %q is not cached", pkgFilename)
+		return fmt.Errorf("error: package file %q is not cached", pkgFilename)
 	}
 	defer f.Close()
 
@@ -36,10 +44,12 @@ func runUnpack(cmd *cobra.Command, args []string) {
 
 	unpackedFiles, err := pm.Unpack(rootBaseDir, f)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	for _, fname := range unpackedFiles {
 		log.Println("unpacked", fname)
 	}
+
+	return nil
 }

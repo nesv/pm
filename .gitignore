@@ -3,3 +3,4 @@ pm-*.tar.gz
 pm-bootstrap
 *.swp
 bin/*
+test/*

@@ -23,18 +23,12 @@ var InstallCmd = &cobra.Command{
 	will create symbolic links in $BIN_DIR that point to the
 	binaries provided in the package.
 
-	Calling "pm install <url>..." is equivalent to running the following
+	Calling "pm install ..." is equivalent to running the following
 	commands:
 
 		$ pm fetch <url>...
-		$ pm unpack $NAME-$VERSION
-		$ pm link $NAME-$VERSION
-
-	Calling "pm install localpackage-1.0.0-linux-amd64.tar.gz" is
-	equivalent to running:
-
-		$ pm unpack $NAME-$VERSION
-		$ pm link $NAME-$VERSION
+		$ pm unpack $NAME $VERSION
+		$ pm link $NAME $VERSION
 	`,
 	Run: runInstall,
 }
@@ -52,16 +46,20 @@ func runInstall(cmd *cobra.Command, args []string) {
 		log.Fatalln("too few arguments")
 	}
 
-	for i, urlStr := range args {
+	for _, urlStr := range args {
 		u, err := url.Parse(urlStr)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
-		log.Println("(%d/%d) %s", i, len(args), filepath.Base(u.Path))
-
 		if err := fetch(urlStr); err != nil {
 			log.Fatalln(err)
 		}
+
+		cachedPath := filepath.Join(rootCacheDir, filepath.Base(u.Path))
+		if err := unpack(cachedPath); err != nil {
+			log.Fatalln(err)
+		}
+
 	}
 }
