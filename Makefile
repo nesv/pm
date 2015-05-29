@@ -6,7 +6,7 @@ TEST_DIR	:= ./test
 TEST_CACHE_DIR	:= ${TEST_DIR}/cache
 TEST_BASE_DIR	:= ${TEST_DIR}/pkgs
 TEST_BIN_DIR	:= ${TEST_DIR}/bin
-PM_TEST_FLAGS	:= -C ${TEST_CACHE_DIR} -d ${TEST_BASE_DIR} -B ${TEST_BIN_DIR}
+PM_TEST_FLAGS	:= -C ${TEST_CACHE_DIR} -D ${TEST_BASE_DIR} -B ${TEST_BIN_DIR} -v
 
 ifndef arch
 	arch = ${GOARCH}
@@ -26,10 +26,11 @@ bin/%: ${GO_FILES}
 	     go build -o $@ ${GO_PKG}/cmd/$(shell basename $@)
 
 METADATA_FILE := metadata-${platform}-${arch}.json
-package: install-deps \
-	pm-${version}-${platform}-${arch}.tar.gz
+PM_PACKAGE_TAR_GZ := pm-${version}-${platform}-${arch}.tar.gz
 
-pm-${version}-${platform}-${arch}.tar.gz: \
+package: ${PM_PACKAGE_TAR_GZ}
+
+${PM_PACKAGE_TAR_GZ}: \
 	pm-bootstrap \
 	${METADATA_FILE} \
 	bin/pm
@@ -50,23 +51,27 @@ endif
 
 live-test: ${TEST_BASE_DIR} ${TEST_CACHE_DIR} ${TEST_BIN_DIR} \
 	package \
-	live-test-unpack \
+	live-test-link \
 	live-test-install
 
 ${TEST_DIR}/%:
 	mkdir -p $@
 
-live-test-fetch: bin/pm clean-test
+live-test-fetch: bin/pm clean-test ${PM_PACKAGE_TAR_GZ}
 	@echo "=== Testing fetch"
-	bin/pm ${PM_TEST_FLAGS} fetch pm-${version}-${platform}-${arch}.tar.gz
+	bin/pm ${PM_TEST_FLAGS} fetch ${PM_PACKAGE_TAR_GZ}
 
 live-test-unpack: bin/pm live-test-fetch
 	@echo "=== Testing unpack"
 	bin/pm ${PM_TEST_FLAGS} unpack pm 0.1.0
 
-live-test-install: bin/pm
+live-test-link: bin/pm live-test-unpack
+	@echo "=== Testing link"
+	bin/pm ${PM_TEST_FLAGS} link pm ${version}
+
+live-test-install: clean-test bin/pm ${PM_PACKAGE_TAR_GZ}
 	@echo "=== Testing install"
-	bin/pm ${PM_TEST_FLAGS} install pm-${version}-${platform}-${arch}.tar.gz
+	bin/pm ${PM_TEST_FLAGS} install ${PM_PACKAGE_TAR_GZ}
 
 clean-test:
 	rm -rvf ${TEST_BASE_DIR}/*
@@ -75,18 +80,20 @@ clean-test:
 
 clean:
 	@echo "=== Cleaning up"
-	@rm -rvf bin
-	@rm -vf pm-bootstrap
-	@rm -vf pm-*-${platform}-${arch}.tar.gz
-	@rm -vf ${METADATA_FILE}
+	@rm -rf bin
+	@rm -f pm-bootstrap
+	@rm -f pm-*-*-*.tar.gz
+	@rm -f metadata-*.json
+	@rm -f ${METADATA_FILE}
 
-clean-all:
-	@echo "=== Cleaning everything up"
-	@rm -rvf bin
-	@rm -vf pm-*-*-*.tar.gz
-	@rm -vf metadata-*.json
+clean-all: clean clean-test
 
 .PHONY: \
 	install-deps \
 	clean \
-	package
+	clean-test \
+	package \
+	live-test \
+	live-test-fetch \
+	live-test-unpack \
+	live-test-install

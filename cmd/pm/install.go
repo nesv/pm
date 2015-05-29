@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -15,10 +16,6 @@ var InstallCmd = &cobra.Command{
 	the remote package (unless the URL starts with "file://"), cache it,
 	then extract the archive to $BASE_DIR/$NAME-$VERSION.
 
-	If you do not want to have the retrieved package cached locally, you
-	can specify the "--no-cache" option. When this option is specified,
-	the retrieved package will be stored in memory before being unpacked.
-
 	After the package has been retrieved, and unpacked, the install command
 	will create symbolic links in $BIN_DIR that point to the
 	binaries provided in the package.
@@ -27,18 +24,10 @@ var InstallCmd = &cobra.Command{
 	commands:
 
 		$ pm fetch <url>...
-		$ pm unpack $NAME $VERSION
-		$ pm link $NAME $VERSION
+		$ pm unpack <package-name> <version>
+		$ pm link <package-name> <version>
 	`,
 	Run: runInstall,
-}
-
-var (
-	installNoCache bool
-)
-
-func init() {
-	InstallCmd.Flags().BoolVarP(&installNoCache, "no-cache", "", false, "Do not cache the retrieved package")
 }
 
 func runInstall(cmd *cobra.Command, args []string) {
@@ -52,6 +41,18 @@ func runInstall(cmd *cobra.Command, args []string) {
 			log.Fatalln(err)
 		}
 
+		// Divine the package name and version from the URL path.
+		//
+		// The parts of the package's basename will be useful in a bit,
+		// but for now, this is also being leveraged as a means of
+		// making sure that the package's basename is in the correct
+		// format.
+		pkgNameParts := strings.SplitN(filepath.Base(u.Path), "-", 3)
+		if len(pkgNameParts) < 3 {
+			// Something is messed up with the package name.
+			log.Fatalln("package name is malformed")
+		}
+
 		if err := fetch(urlStr); err != nil {
 			log.Fatalln(err)
 		}
@@ -61,5 +62,20 @@ func runInstall(cmd *cobra.Command, args []string) {
 			log.Fatalln(err)
 		}
 
+		linkedFiles, err := linkBinaries(
+			rootBaseDir,
+			pkgNameParts[0],
+			pkgNameParts[1],
+			rootBinDir,
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if Verbose {
+			for link, target := range linkedFiles {
+				log.Printf("linked %q -> %q", link, target)
+			}
+		}
 	}
 }
