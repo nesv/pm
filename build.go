@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -58,8 +57,6 @@ func Build(m *Metadata, outputDir string) error {
 }
 
 func writeResource(tw *tar.Writer, m *Metadata, resourcePath string) error {
-	log.Println("adding resource", resourcePath)
-
 	f, err := os.Open(resourcePath)
 	if err != nil {
 		return fmt.Errorf("pm: error opening resource %q: %v", resourcePath, err)
@@ -76,10 +73,7 @@ func writeResource(tw *tar.Writer, m *Metadata, resourcePath string) error {
 		return fmt.Errorf("pm: error creating tar header for file %q: %v", resourcePath, err)
 	}
 
-	name := filepath.Join(
-		fmt.Sprintf("%s-%s", m.Name, m.Version),
-		filepath.Clean(resourcePath),
-	)
+	name := filepath.Join(m.Name, m.Version, filepath.Clean(resourcePath))
 	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0
@@ -97,8 +91,6 @@ func writeResource(tw *tar.Writer, m *Metadata, resourcePath string) error {
 }
 
 func writeMetadata(tw *tar.Writer, m *Metadata) error {
-	log.Println("adding metadata")
-
 	b, err := json.MarshalIndent(m, "", "\t")
 	if err != nil {
 		return fmt.Errorf("pm: error marshaling metadata: %v", err)
@@ -106,7 +98,7 @@ func writeMetadata(tw *tar.Writer, m *Metadata) error {
 
 	now := time.Now()
 
-	name := filepath.Join(fmt.Sprintf("%s-%s", m.Name, m.Version), "metadata.json")
+	name := filepath.Join(m.Name, m.Version, "metadata.json")
 	hdr := &tar.Header{
 		Name:       name,
 		Size:       int64(len(b)),
@@ -128,8 +120,6 @@ func writeMetadata(tw *tar.Writer, m *Metadata) error {
 }
 
 func tarAddBinary(tw *tar.Writer, m *Metadata, binPath string) error {
-	log.Println("adding binary", binPath)
-
 	bf, err := os.Open(binPath)
 	if err != nil {
 		return fmt.Errorf("pm: error opening binary file %q: %v", binPath, err)
@@ -146,10 +136,7 @@ func tarAddBinary(tw *tar.Writer, m *Metadata, binPath string) error {
 		return fmt.Errorf("pm: error creating header for binary file %q: %v", binPath, err)
 	}
 
-	name := filepath.Join(
-		fmt.Sprintf("%s-%s", m.Name, m.Version),
-		filepath.Clean(binPath),
-	)
+	name := filepath.Join(m.Name, m.Version, filepath.Clean(binPath))
 	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0

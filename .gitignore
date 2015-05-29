@@ -4,3 +4,4 @@ pm-bootstrap
 *.swp
 bin/*
 test/*
+.DS_Store
