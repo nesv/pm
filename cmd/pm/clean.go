@@ -62,6 +62,24 @@ func runClean(cmd *cobra.Command, args []string) {
 	}
 }
 
+func cleanCachedPkg(name, version string) error {
+	pkgFile := fmt.Sprintf("%s.tar.gz", strings.Join(
+		[]string{name, version, runtime.GOOS, runtime.GOARCH},
+		pm.PackageFieldSeparator,
+	))
+	pth := filepath.Join(rootCacheDir, pkgFile)
+
+	if Verbose {
+		fmt.Println("removing", pkgFile, "from cache")
+	}
+
+	if err := os.Remove(pth); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	return nil
+}
+
 func cleanCache() {
 	cached, err := pm.ListCachedPackagesSlice(rootCacheDir)
 	if err != nil {
@@ -81,6 +99,19 @@ func cleanCache() {
 			log.Fatalln(err)
 		}
 	}
+}
+
+func cleanUnlinkedPkg(name, version string) error {
+	if Verbose {
+		fmt.Println("removing", strings.Join([]string{name, version}, pm.PackageFieldSeparator))
+	}
+
+	pth := filepath.Join(rootBaseDir, name, version)
+	if err := os.RemoveAll(pth); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func cleanUnlinked() {
