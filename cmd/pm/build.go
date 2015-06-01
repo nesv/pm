@@ -10,24 +10,25 @@ import (
 var BuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build a package",
-	Long: `By default, the build command will look for a metadata.json file
-	in the current directory, but you can specify the path to the metadata
-	file using the -m or --metadata flags.
+	Long: `
+By default, the build command will look for a metadata.json file in the current
+directory, but you can specify the path to the metadata file using the -m or 
+--metadata flags.
 
-	For example, assuming the following fields in your metadata file:
+For example, assuming the following fields in your metadata file:
 
-	{
-		"name": "foo",
-		"version": "0.1.0",
-		"platform": "linux",
-		"architecture": "amd64",
-		"checksums": ["sha512"],
-		...
-	}
+{
+	"name": "foo",
+	"version": "0.1.0",
+	"platform": "linux",
+	"architecture": "amd64",
+	"checksums": ["sha512"],
+	...
+}
 
-	...build will produce "foo-0.1.0-linux-amd64.tar.gz", and
-	"foo-0.1.0-linux-amd64.tar.gz.sha512".
-	`,
+...build will produce "foo-0.1.0-linux-amd64.tar.gz", and
+"foo-0.1.0-linux-amd64.tar.gz.sha512".
+`,
 	Run: runBuild,
 }
 

@@ -15,14 +15,14 @@ import (
 var FetchCmd = &cobra.Command{
 	Use:   "fetch [url]",
 	Short: "Fetch a remote package, and store it in the local cache",
-	Long: `pm currently supports fetching packages with the following URL
-	schemes:
+	Long: `
+pm currently supports fetching packages with the following URL schemes:
 
-	* http
-	* https
-	* file
+    * http
+    * https
+    * file
 
-	You can supply more than one package URL to the fetch command.
+You can supply more than one package URL to the fetch command.
 	`,
 	Run: runFetch,
 }

@@ -8,17 +8,17 @@ import (
 )
 
 var LinkCmd = &cobra.Command{
-	Use:   "link [package] [version]",
-	Short: "Link the binaries of the specified package and version",
+	Use:   "link [package]",
+	Short: "Link the binaries of the specified package",
 	Run:   runLink,
 }
 
 func runLink(cmd *cobra.Command, args []string) {
-	if len(args) < 2 {
+	if len(args) < 1 {
 		log.Fatalln("not enough arguments")
 	}
 
-	linkedFiles, err := linkBinaries(rootBaseDir, args[0], args[1], rootBinDir)
+	linkedFiles, err := linkBinaries(rootBaseDir, args[0], rootBinDir)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -30,6 +30,6 @@ func runLink(cmd *cobra.Command, args []string) {
 	}
 }
 
-func linkBinaries(baseDir, name, version, binDir string) (map[string]string, error) {
-	return pm.Link(baseDir, name, version, binDir)
+func linkBinaries(baseDir, pkg, binDir string) (map[string]string, error) {
+	return pm.Link(baseDir, pkg, binDir)
 }

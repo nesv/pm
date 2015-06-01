@@ -25,7 +25,7 @@ bin/%: ${GO_FILES}
 	GOOS=${platform} GOARCH=${arch} \
 	     go build -o $@ ${GO_PKG}/cmd/$(shell basename $@)
 
-METADATA_FILE := metadata-${platform}-${arch}.json
+METADATA_FILE := metadata-${version}-${platform}-${arch}.json
 PM_PACKAGE_TAR_GZ := pm-${version}-${platform}-${arch}.tar.gz
 
 package: ${PM_PACKAGE_TAR_GZ}
@@ -34,7 +34,8 @@ ${PM_PACKAGE_TAR_GZ}: \
 	pm-bootstrap \
 	${METADATA_FILE} \
 	bin/pm
-	./pm-bootstrap build --metadata=metadata-${platform}-${arch}.json
+	@echo "=== Making package (version ${version})"
+	./pm-bootstrap build --metadata=${METADATA_FILE}
 
 pm-bootstrap: ${GO_FILES}
 	go build -o $@ ${GO_PKG}/cmd/pm
@@ -52,7 +53,12 @@ endif
 live-test: ${TEST_BASE_DIR} ${TEST_CACHE_DIR} ${TEST_BIN_DIR} \
 	package \
 	live-test-link \
-	live-test-install
+	live-test-install \
+	live-test-list-cached \
+	live-test-list-linked \
+	live-test-list-unpacked \
+	live-test-unlink \
+	live-test-clean
 
 ${TEST_DIR}/%:
 	mkdir -p $@
@@ -63,15 +69,35 @@ live-test-fetch: bin/pm clean-test ${PM_PACKAGE_TAR_GZ}
 
 live-test-unpack: bin/pm live-test-fetch
 	@echo "=== Testing unpack"
-	bin/pm ${PM_TEST_FLAGS} unpack pm 0.1.0
+	bin/pm ${PM_TEST_FLAGS} unpack pm-${version}
 
 live-test-link: bin/pm live-test-unpack
 	@echo "=== Testing link"
-	bin/pm ${PM_TEST_FLAGS} link pm ${version}
+	bin/pm ${PM_TEST_FLAGS} link pm-${version}
 
 live-test-install: clean-test bin/pm ${PM_PACKAGE_TAR_GZ}
 	@echo "=== Testing install"
 	bin/pm ${PM_TEST_FLAGS} install ${PM_PACKAGE_TAR_GZ}
+
+live-test-clean: bin/pm ${PM_PACKAGE_TAR_GZ}
+	@echo "=== Testing clean --all"
+	bin/pm ${PM_TEST_FLAGS} clean --all
+
+live-test-list-linked: bin/pm
+	@echo "=== Testing list --linked"
+	bin/pm ${PM_TEST_FLAGS} list linked
+
+live-test-list-cached: bin/pm
+	@echo "=== Testing list --cached"
+	bin/pm ${PM_TEST_FLAGS} list cached
+
+live-test-list-unpacked: bin/pm
+	@echo "=== Testing list --unpacked"
+	bin/pm ${PM_TEST_FLAGS} list unpacked
+
+live-test-unlink: bin/pm
+	@echo "=== Testing unlink"
+	bin/pm ${PM_TEST_FLAGS} unlink pm-${version}
 
 clean-test:
 	rm -rvf ${TEST_BASE_DIR}/*
