@@ -18,7 +18,7 @@ can extract the files using `tar(1)`:
 
 After you have extracted the contents from the archive, run:
 
-    $ pm/0.1.0/bin/pm install https://github.com/nesv/pm/releases/v0.1.0/pm-0.1.0-linux-amd64.tar.gz
+    $ pm/0.1.0/bin/pm install https://github.com/nesv/pm/releases/download/v0.1.0/pm-0.1.0-linux-amd64.tar.gz
 
 If you are installing pm on OS X, substitute `linux` for `darwin` in the URL,
 above.
@@ -40,6 +40,6 @@ Downloads for pm will be hosted on GitHub, at the
 [pm releases page](https://github.com/nesv/pm/releases). Since pm is packaged
 with pm for distribution, you can run:
 
-    $ pm install https://github.com/nesv/pm/releases/VERSION/pm-VERSION-PLATFORM-ARCH.tar.gz
+    $ pm install https://github.com/nesv/pm/releases/download/VERSION/pm-VERSION-PLATFORM-ARCH.tar.gz
 
 
