@@ -18,17 +18,21 @@ func ListUnpackedPackagesSlice(baseDir string) ([]string, error) {
 		return nil, err
 	}
 
-	matches, err := filepath.Glob(filepath.Join(baseDir, "*", "*"))
+	matches, err := filepath.Glob(filepath.Join(baseDir, "*", "*", "metadata.json"))
 	if err != nil {
 		return nil, err
 	}
 
 	var pkgs = make([]string, 0)
 
-	for _, m := range matches {
-		m = strings.TrimPrefix(m, baseDir+string(os.PathSeparator))
-		m = strings.Replace(m, string(os.PathSeparator), "-", -1)
-		pkgs = append(pkgs, m)
+	for _, mpath := range matches {
+		m, err := LoadMetadata(mpath)
+		if err != nil && os.IsNotExist(err) {
+			continue
+		}
+
+		pkg := fmt.Sprintf("%s%s%s", m.Name, PackageFieldSeparator, m.Version)
+		pkgs = append(pkgs, pkg)
 	}
 
 	return pkgs, nil
