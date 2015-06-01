@@ -29,7 +29,7 @@ At this point, you can remove the `pm` directory that was created when you ran
 
 ### A note on `go get`
 
-Unforunately, pm is not go-get-able. Since I did not want to have to write
+Unfortunately, pm is not go-get-able. Since I did not want to have to write
 command-line parsing stuff (read: "reinvent the wheel"), I'm using
 [cobra](https://github.com/spf13/cobra) to do all of the fancy stuff, and I am
 relying on [gpm](https://github.com/pote/gpm) to manage the dependencies.
