@@ -6,27 +6,30 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/nesv/pm"
 	"github.com/spf13/cobra"
 )
 
 var InstallCmd = &cobra.Command{
 	Use:   "install [url|path]",
 	Short: "Install a package at the specified URL, or path",
-	Long: `When a package URL is provided, the install command will fetch
-	the remote package (unless the URL starts with "file://"), cache it,
-	then extract the archive to $BASE_DIR/$NAME-$VERSION.
+	Long: `
+When a package URL is provided, the install command will fetch the remote
+package (unless the URL starts with "file://"), cache it, then extract the
+archive to $BASE_DIR/$NAME-$VERSION.
 
-	After the package has been retrieved, and unpacked, the install command
-	will create symbolic links in $BIN_DIR that point to the
-	binaries provided in the package.
+After the package has been retrieved, and unpacked, the install command will
+create symbolic links in $BIN_DIR that point to the binaries provided in the
+package.
 
-	Calling "pm install ..." is equivalent to running the following
-	commands:
+Calling "pm install ..." is equivalent to running the following commands:
 
-		$ pm fetch <url>...
-		$ pm unpack <package-name> <version>
-		$ pm link <package-name> <version>
-	`,
+    $ pm fetch <url>...
+    $ pm unpack <package>
+    $ pm link <package>
+
+where <package> is of the format "name-version" (e.g. "foo-1.0.0").
+`,
 	Run: runInstall,
 }
 
@@ -64,8 +67,7 @@ func runInstall(cmd *cobra.Command, args []string) {
 
 		linkedFiles, err := linkBinaries(
 			rootBaseDir,
-			pkgNameParts[0],
-			pkgNameParts[1],
+			strings.Join(pkgNameParts[0:2], pm.PackageFieldSeparator),
 			rootBinDir,
 		)
 		if err != nil {

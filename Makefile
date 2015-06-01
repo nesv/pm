@@ -68,11 +68,11 @@ live-test-fetch: bin/pm clean-test ${PM_PACKAGE_TAR_GZ}
 
 live-test-unpack: bin/pm live-test-fetch
 	@echo "=== Testing unpack"
-	bin/pm ${PM_TEST_FLAGS} unpack pm 0.1.0
+	bin/pm ${PM_TEST_FLAGS} unpack pm-0.1.0
 
 live-test-link: bin/pm live-test-unpack
 	@echo "=== Testing link"
-	bin/pm ${PM_TEST_FLAGS} link pm ${version}
+	bin/pm ${PM_TEST_FLAGS} link pm-${version}
 
 live-test-install: clean-test bin/pm ${PM_PACKAGE_TAR_GZ}
 	@echo "=== Testing install"

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func Link(baseDir, pkgName, version, binDir string) (map[string]string, error) {
-	metadataPath := filepath.Join(baseDir, pkgName, version, "metadata.json")
+func Link(baseDir, pkg, binDir string) (map[string]string, error) {
+	pkg = strings.Replace(pkg, PackageFieldSeparator, string(os.PathSeparator), -1)
+	metadataPath := filepath.Join(baseDir, pkg, "metadata.json")
 	m, err := LoadMetadata(metadataPath)
 	if err != nil {
 		return nil, fmt.Errorf("error loading %s: %v", metadataPath, err)
@@ -17,7 +19,7 @@ func Link(baseDir, pkgName, version, binDir string) (map[string]string, error) {
 
 	for _, bin := range m.Binaries {
 		link := filepath.Join(binDir, filepath.Base(bin))
-		targ := filepath.Join(baseDir, pkgName, version, bin)
+		targ := filepath.Join(baseDir, pkg, bin)
 
 		// If we get here, it means we were able to open a file
 		// at the intended path of our symlink.

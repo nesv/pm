@@ -15,8 +15,9 @@ import (
 var CleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean stuff up",
-	Long: `The "clean" command will only clean up the parts of itself that you
-tell it to. Without any flags provided, "clean" will do nothing.
+	Long: `
+The "clean" command will only clean up the parts of itself that you tell it to.
+Without any flags provided, "clean" will do nothing.
 
 To have pm clean its cache, provide the "--cache" flag:
 
