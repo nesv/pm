@@ -2,7 +2,9 @@ package pm
 
 import (
 	"archive/tar"
+	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -23,6 +25,7 @@ func Unpack(baseDir string, pkg io.Reader) ([]string, error) {
 	tr := tar.NewReader(gz)
 
 	var files = make([]string, 0)
+	var meta Metadata
 
 	for {
 		hdr, err := tr.Next()
@@ -30,6 +33,22 @@ func Unpack(baseDir string, pkg io.Reader) ([]string, error) {
 			break
 		} else if err != nil {
 			return nil, err
+		}
+
+		buf := new(bytes.Buffer)
+		if _, err := buf.ReadFrom(tr); err != nil {
+			return nil, fmt.Errorf("failed to read %q from archive: %v", hdr.Name, err)
+		}
+
+		br := bytes.NewReader(buf.Bytes())
+
+		if filepath.Base(hdr.Name) == "metadata.json" {
+			dec := json.NewDecoder(br)
+			if err := dec.Decode(&meta); err != nil {
+				return nil, fmt.Errorf("failed to load metadata file from archive: %v", err)
+			}
+
+			br.Seek(0, 0)
 		}
 
 		tgt := filepath.Join(baseDir, hdr.Name)
@@ -43,7 +62,7 @@ func Unpack(baseDir string, pkg io.Reader) ([]string, error) {
 			return nil, err
 		}
 
-		if _, err := io.Copy(f, tr); err != nil {
+		if _, err := io.Copy(f, br); err != nil {
 			f.Close()
 			return nil, err
 		}
@@ -51,6 +70,14 @@ func Unpack(baseDir string, pkg io.Reader) ([]string, error) {
 		files = append(files, tgt)
 
 		f.Close()
+	}
+
+	// Fix the permissions on the unpacked binaries.
+	for _, bin := range meta.Binaries {
+		binPath := filepath.Join(baseDir, meta.Name, meta.Version, bin)
+		if err := os.Chmod(binPath, 0755); err != nil {
+			return nil, fmt.Errorf("failed to change permissions for %q: %v", binPath, err)
+		}
 	}
 
 	return files, nil
