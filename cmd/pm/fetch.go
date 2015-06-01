@@ -32,16 +32,6 @@ func runFetch(cmd *cobra.Command, args []string) {
 		log.Fatalln("no package URLs specified")
 	}
 
-	// Check to see if the package cache directory exists, and if it
-	// doesn't, then create it.
-	cacheDir, err := os.Open(rootCacheDir)
-	if err != nil && os.IsNotExist(err) {
-		if e := os.MkdirAll(rootCacheDir, 0755); e != nil {
-			log.Fatalln(err)
-		}
-	}
-	cacheDir.Close()
-
 	for _, urlStr := range args {
 		if err := fetch(urlStr); err != nil {
 			log.Fatalln(err)
@@ -55,11 +45,27 @@ func fetch(urlStr string) error {
 		log.Fatalln(err)
 	}
 
+	// Check to see if the package cache directory exists, and if it
+	// doesn't, then create it.
+	if fi, err := os.Stat(rootCacheDir); err != nil && os.IsNotExist(err) {
+		if Verbose {
+			log.Println("cache directory does not exist; creating it")
+		}
+
+		if err := os.MkdirAll(rootCacheDir, 0755); err != nil {
+			log.Fatalln("failed to create cache directory:", err)
+		}
+	} else if !fi.IsDir() {
+		log.Fatalln(rootCacheDir, "exists, but is not a directory")
+	}
+
 	destPath := filepath.Join(rootCacheDir, filepath.Base(u.Path))
 	if f, err := os.Open(destPath); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed while checking cache for %q", filepath.Base(u.Path))
 	} else if err != nil && os.IsNotExist(err) {
-		log.Println("fetching", u.Path)
+		if Verbose {
+			log.Println("fetching", u.String())
+		}
 
 		r, err := pm.Fetch(urlStr)
 		if err != nil {
@@ -69,7 +75,7 @@ func fetch(urlStr string) error {
 
 		dest, err := os.Create(destPath)
 		if err != nil {
-			return fmt.Errorf("failed to create %q", destPath)
+			return fmt.Errorf("failed to create %q: %v", destPath, err)
 		}
 		defer dest.Close()
 
@@ -78,7 +84,9 @@ func fetch(urlStr string) error {
 		}
 	} else {
 		f.Close()
-		log.Printf("using %q from cache", filepath.Base(u.Path))
+		if Verbose {
+			log.Printf("%s is already cached", u.Path)
+		}
 	}
 
 	return nil
