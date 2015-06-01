@@ -42,8 +42,8 @@ var (
 
 func init() {
 	CleanCmd.Flags().BoolVarP(&CleanAll, "all", "", false, "Clean everything")
-	CleanCmd.Flags().BoolVarP(&CleanCache, "cache", "", false, "Remove all cached files")
-	CleanCmd.Flags().BoolVarP(&CleanUnlinked, "unlinked", "", false, "Remove all unpacked, unlinked packages")
+	CleanCmd.Flags().BoolVarP(&CleanCache, "cache", "c", false, "Remove all cached files")
+	CleanCmd.Flags().BoolVarP(&CleanUnlinked, "unlinked", "u", false, "Remove all unpacked, unlinked packages")
 }
 
 func runClean(cmd *cobra.Command, args []string) {
