@@ -36,6 +36,7 @@ func main() {
 		InstallCmd,
 		LinkCmd,
 		ListCmd,
+		UnlinkCmd,
 		UnpackCmd,
 	)
 
