@@ -27,12 +27,16 @@ At this point, you can remove the `pm` directory that was created when you ran
 `tar zxvf ...`, because we used the pre-packaged version of pm to install pm.
 :smile:
 
-### A note on `go get`
+### Installing with `go get`
 
-Unfortunately, pm is not go-get-able. Since I did not want to have to write
-command-line parsing stuff (read: "reinvent the wheel"), I'm using
-[cobra](https://github.com/spf13/cobra) to do all of the fancy stuff, and I am
-relying on [gpm](https://github.com/pote/gpm) to manage the dependencies.
+While you can install pm using `go get gopkg.in/nesv/pm.v0/cmd/pm`, I have not
+yet decided whether or not I like this approach. The benefit of installing pm
+this way, is that since pm will not be managed by itself, it cannot be
+uninstalled by running `pm remove pm-x.y.z`. The only detriment to this approach,
+that I can currently think of, is that it prevents you from being able to use pm
+to upgrade itself.
+
+Ultimately, the choice is yours.
 
 ## Upgrading from a previous release
 
