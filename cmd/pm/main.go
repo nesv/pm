@@ -31,9 +31,11 @@ func main() {
 
 	rootCmd.AddCommand(
 		BuildCmd,
+		CleanCmd,
 		FetchCmd,
 		InstallCmd,
 		LinkCmd,
+		ListCmd,
 		UnpackCmd,
 	)
 

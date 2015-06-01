@@ -52,7 +52,12 @@ endif
 live-test: ${TEST_BASE_DIR} ${TEST_CACHE_DIR} ${TEST_BIN_DIR} \
 	package \
 	live-test-link \
-	live-test-install
+	live-test-install \
+	live-test-list-cached \
+	live-test-list-linked \
+	live-test-list-unpacked \
+	live-test-list-cached-unpacked-linked \
+	live-test-clean
 
 ${TEST_DIR}/%:
 	mkdir -p $@
@@ -72,6 +77,26 @@ live-test-link: bin/pm live-test-unpack
 live-test-install: clean-test bin/pm ${PM_PACKAGE_TAR_GZ}
 	@echo "=== Testing install"
 	bin/pm ${PM_TEST_FLAGS} install ${PM_PACKAGE_TAR_GZ}
+
+live-test-clean: bin/pm ${PM_PACKAGE_TAR_GZ}
+	@echo "=== Testing clean --all"
+	bin/pm ${PM_TEST_FLAGS} clean --all
+
+live-test-list-linked: bin/pm
+	@echo "=== Testing list --linked"
+	bin/pm ${PM_TEST_FLAGS} list --linked
+
+live-test-list-cached: bin/pm
+	@echo "=== Testing list --cached"
+	bin/pm ${PM_TEST_FLAGS} list --cached
+
+live-test-list-unpacked: bin/pm
+	@echo "=== Testing list --unpacked"
+	bin/pm ${PM_TEST_FLAGS} list --unpacked
+
+live-test-list-cached-unpacked-linked: bin/pm
+	@echo "=== Testing list -cxi"
+	bin/pm ${PM_TEST_FLAGS} list -cxi
 
 clean-test:
 	rm -rvf ${TEST_BASE_DIR}/*
