@@ -20,29 +20,37 @@ func runUnlink(cmd *cobra.Command, args []string) {
 		log.Fatalln("not enough arguments")
 	}
 
-	pkgs, err := pm.ListLinkedPackages(rootBaseDir, rootBinDir)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	parts := strings.SplitN(args[0], pm.PackageFieldSeparator, 2)
 	if len(parts) < 2 {
 		log.Fatalln("invalid package name: must be in the format <name>-<version>")
 	}
 
-	if version, linked := pkgs[parts[0]]; !linked || parts[1] != version {
-		log.Fatalln("package is not linked")
-	}
-
-	unlinked, err := pm.Unlink(rootBaseDir, rootBinDir, parts[0], parts[1])
+	pkgs, err := pm.ListLinkedPackages(rootBaseDir, rootBinDir)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if err := unlinkPkg(pkgs, parts[0], parts[1]); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func unlinkPkg(linkedPkgs map[string]string, name, version string) error {
+	if vsn, linked := linkedPkgs[name]; !linked || version != vsn {
+		return fmt.Errorf("package is not linked")
+	}
+
+	unlinked, err := pm.Unlink(rootBaseDir, rootBinDir, name, version)
+	if err != nil {
+		return err
 	}
 
 	if Verbose {
 		for _, link := range unlinked {
 			fmt.Println("removed link", link)
 		}
-		fmt.Println("unlinked", args[0])
+		fmt.Println("unlinked", strings.Join([]string{name, version}, pm.PackageFieldSeparator))
 	}
+
+	return nil
 }

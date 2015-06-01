@@ -58,6 +58,7 @@ live-test: ${TEST_BASE_DIR} ${TEST_CACHE_DIR} ${TEST_BIN_DIR} \
 	live-test-list-linked \
 	live-test-list-unpacked \
 	live-test-unlink \
+	live-test-remove \
 	live-test-clean
 
 ${TEST_DIR}/%:
@@ -98,6 +99,11 @@ live-test-list-unpacked: bin/pm
 live-test-unlink: bin/pm
 	@echo "=== Testing unlink"
 	bin/pm ${PM_TEST_FLAGS} unlink pm-${version}
+
+live-test-remove: bin/pm live-test-link
+	@echo "=== Testing remove (with purge)"
+	@bin/pm ${PM_TEST_FLAGS} link pm-${version}
+	bin/pm ${PM_TEST_FLAGS} remove pm-${version} --purge
 
 clean-test:
 	rm -rvf ${TEST_BASE_DIR}/*
