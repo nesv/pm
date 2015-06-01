@@ -48,7 +48,10 @@ func fetch(urlStr string) error {
 	// Check to see if the package cache directory exists, and if it
 	// doesn't, then create it.
 	if fi, err := os.Stat(rootCacheDir); err != nil && os.IsNotExist(err) {
-		log.Println("cache directory does not exist, creating it")
+		if Verbose {
+			log.Println("cache directory does not exist; creating it")
+		}
+
 		if err := os.MkdirAll(rootCacheDir, 0755); err != nil {
 			log.Fatalln("failed to create cache directory:", err)
 		}
@@ -60,7 +63,9 @@ func fetch(urlStr string) error {
 	if f, err := os.Open(destPath); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed while checking cache for %q", filepath.Base(u.Path))
 	} else if err != nil && os.IsNotExist(err) {
-		log.Println("fetching", u.Path)
+		if Verbose {
+			log.Println("fetching", u.String())
+		}
 
 		r, err := pm.Fetch(urlStr)
 		if err != nil {
@@ -79,7 +84,9 @@ func fetch(urlStr string) error {
 		}
 	} else {
 		f.Close()
-		log.Printf("using %q from cache", filepath.Base(u.Path))
+		if Verbose {
+			log.Printf("%s is already cached", u.Path)
+		}
 	}
 
 	return nil
