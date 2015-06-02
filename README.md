@@ -20,7 +20,7 @@ After you have extracted the contents from the archive, run:
 
     $ pm/0.1.0/bin/pm install https://github.com/nesv/pm/releases/download/v0.1.0/pm-0.1.0-linux-amd64.tar.gz
 
-If you are installing pm on OS X, substitute `linux` for `darwin` in the URL,
+If you are installing pm on OS X, substitute `linux` with `darwin` in the URL,
 above.
 
 At this point, you can remove the `pm` directory that was created when you ran
