@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 func Link(baseDir, pkg, binDir string) (map[string]string, error) {
-	pkg = strings.Replace(pkg, PackageFieldSeparator, string(os.PathSeparator), -1)
 	metadataPath := filepath.Join(baseDir, pkg, "metadata.json")
 	m, err := LoadMetadata(metadataPath)
 	if err != nil {

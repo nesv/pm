@@ -73,7 +73,7 @@ func writeResource(tw *tar.Writer, m *Metadata, resourcePath string) error {
 		return fmt.Errorf("pm: error creating tar header for file %q: %v", resourcePath, err)
 	}
 
-	name := filepath.Join(m.Name, m.Version, filepath.Clean(resourcePath))
+	name := filepath.Join(fmt.Sprintf("%s-%s", m.Name, m.Version), filepath.Clean(resourcePath))
 	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0
@@ -98,7 +98,7 @@ func writeMetadata(tw *tar.Writer, m *Metadata) error {
 
 	now := time.Now()
 
-	name := filepath.Join(m.Name, m.Version, "metadata.json")
+	name := filepath.Join(fmt.Sprintf("%s-%s", m.Name, m.Version), "metadata.json")
 	hdr := &tar.Header{
 		Name:       name,
 		Size:       int64(len(b)),
@@ -136,7 +136,7 @@ func tarAddBinary(tw *tar.Writer, m *Metadata, binPath string) error {
 		return fmt.Errorf("pm: error creating header for binary file %q: %v", binPath, err)
 	}
 
-	name := filepath.Join(m.Name, m.Version, filepath.Clean(binPath))
+	name := filepath.Join(fmt.Sprintf("%s-%s", m.Name, m.Version), filepath.Clean(binPath))
 	hdr.Name = name
 	hdr.Uid = 0
 	hdr.Gid = 0

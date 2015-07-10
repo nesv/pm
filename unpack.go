@@ -74,7 +74,7 @@ func Unpack(baseDir string, pkg io.Reader) ([]string, error) {
 
 	// Fix the permissions on the unpacked binaries.
 	for _, bin := range meta.Binaries {
-		binPath := filepath.Join(baseDir, meta.Name, meta.Version, bin)
+		binPath := filepath.Join(baseDir, fmt.Sprintf("%s-%s", meta.Name, meta.Version), bin)
 		if err := os.Chmod(binPath, 0755); err != nil {
 			return nil, fmt.Errorf("failed to change permissions for %q: %v", binPath, err)
 		}

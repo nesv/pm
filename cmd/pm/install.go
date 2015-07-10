@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nesv/pm"
 	"github.com/spf13/cobra"
 )
 
@@ -44,18 +43,6 @@ func runInstall(cmd *cobra.Command, args []string) {
 			log.Fatalln(err)
 		}
 
-		// Divine the package name and version from the URL path.
-		//
-		// The parts of the package's basename will be useful in a bit,
-		// but for now, this is also being leveraged as a means of
-		// making sure that the package's basename is in the correct
-		// format.
-		pkgNameParts := strings.SplitN(filepath.Base(u.Path), "-", 3)
-		if len(pkgNameParts) < 3 {
-			// Something is messed up with the package name.
-			log.Fatalln("package name is malformed")
-		}
-
 		if err := fetch(urlStr); err != nil {
 			log.Fatalln(err)
 		}
@@ -65,9 +52,10 @@ func runInstall(cmd *cobra.Command, args []string) {
 			log.Fatalln(err)
 		}
 
+		pkgNameParts := strings.Split(args[0], "-")
 		linkedFiles, err := linkBinaries(
 			rootBaseDir,
-			strings.Join(pkgNameParts[0:2], pm.PackageFieldSeparator),
+			strings.Join(pkgNameParts[:len(pkgNameParts)-2], "-"),
 			rootBinDir,
 		)
 		if err != nil {
